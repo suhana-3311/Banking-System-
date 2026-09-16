@@ -1,0 +1,161 @@
+<div class="page-header">
+  <div>
+    <h1>{{#if isGlobal}}All Bank Transactions{{else}}Transactions - {{account.account_number}}{{/if}}</h1>
+    <p class="muted">
+      {{#if isGlobal}}
+        Comprehensive audit log of all deposits, withdrawals, and transfers
+      {{else}}
+        {{account.account_number}} &middot; {{account.first_name}} {{account.last_name}} ({{account.account_type}} Account &middot; Balance: {{formatCurrency account.balance}})
+      {{/if}}
+    </p>
+  </div>
+  <div class="header-actions">
+    <button id="show-add-transaction" class="btn btn-primary">+ New Transaction</button>
+    {{#if isGlobal}}
+      <a class="btn btn-ghost" href="/accounts">View Accounts</a>
+    {{else}}
+      <a class="btn btn-ghost" href="/account/{{account.account_number}}">Account details</a>
+      <a class="btn btn-ghost" href="/transactions">&larr; All Transactions</a>
+    {{/if}}
+  </div>
+</div>
+
+<section id="add-transaction-panel" class="panel hidden">
+  <div class="panel-title"><h2>Record New Transaction / Fund Transfer</h2></div>
+  <form id="add-transaction-form" class="form-grid" novalidate>
+    {{#if isGlobal}}
+      <label>Source Account
+        <select name="account_number" id="txn-source-account" required>
+          <option value="">Select source account</option>
+          {{#each accounts}}
+            <option value="{{this.account_number}}">{{this.account_number}} - {{this.first_name}} {{this.last_name}} (Bal: {{formatCurrency this.balance}})</option>
+          {{/each}}
+        </select>
+      </label>
+    {{else}}
+      <input type="hidden" name="account_number" id="txn-source-account" value="{{account.account_number}}">
+    {{/if}}
+
+    <label>Transaction Type
+      <select name="transaction_type" id="txn-type-select" required>
+        <option value="">Select type</option>
+        <option value="CREDIT">Deposit (CREDIT)</option>
+        <option value="DEBIT">Withdrawal (DEBIT)</option>
+        <option value="TRANSFER">Fund Transfer (TRANSFER)</option>
+      </select>
+    </label>
+
+    <label id="destination-account-group" class="hidden">Destination Account
+      <select name="to_account_number" id="txn-dest-account">
+        <option value="">Select recipient account</option>
+        {{#if isGlobal}}
+          {{#each accounts}}
+            <option value="{{this.account_number}}">{{this.account_number}} - {{this.first_name}} {{this.last_name}}</option>
+          {{/each}}
+        {{else}}
+          {{#each otherAccounts}}
+            <option value="{{this.account_number}}">{{this.account_number}} - {{this.first_name}} {{this.last_name}}</option>
+          {{/each}}
+        {{/if}}
+      </select>
+    </label>
+
+    <label>Amount (₹)
+      <input type="number" name="amount" min="0.01" step="0.01" placeholder="0.00" required>
+    </label>
+
+    <label>Description / Purpose
+      <input type="text" name="description" maxlength="255" placeholder="e.g. Cash deposit, Salary, Invoice payment" required>
+    </label>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Record Transaction</button>
+      <button type="button" id="hide-add-transaction" class="btn btn-ghost">Cancel</button>
+    </div>
+    <p id="add-transaction-message" class="form-message" role="status"></p>
+  </form>
+</section>
+
+{{#if isGlobal}}
+  <section class="panel filter-panel">
+    <div class="panel-title">
+      <h2>Filter Transactions</h2>
+      <a class="btn btn-small btn-ghost" href="/transactions">Reset Filters</a>
+    </div>
+    <form method="GET" action="/transactions" class="filter-form">
+      <div class="filter-group">
+        <label for="filter-account">Filter by Account:</label>
+        <select name="account" id="filter-account" onchange="this.form.submit()">
+          <option value="">All Accounts</option>
+          {{#each allAccounts}}
+            <option value="{{this.account_number}}" {{#if (eq ../selectedAccount this.account_number)}}selected{{/if}}>
+              {{this.account_number}} - {{this.first_name}} {{this.last_name}}
+            </option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="filter-type">Filter by Type:</label>
+        <select name="type" id="filter-type" onchange="this.form.submit()">
+          <option value="">All Types</option>
+          <option value="CREDIT" {{#if (eq selectedType "CREDIT")}}selected{{/if}}>CREDIT (Deposits & Inward Transfers)</option>
+          <option value="DEBIT" {{#if (eq selectedType "DEBIT")}}selected{{/if}}>DEBIT (Withdrawals & Outward Transfers)</option>
+        </select>
+      </div>
+    </form>
+  </section>
+{{/if}}
+
+<section class="panel">
+  <div class="panel-title">
+    <h2>Transaction Log</h2>
+    <span class="muted">{{transactions.length}} transactions listed</span>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Date & Time</th>
+          {{#if isGlobal}}<th>Account</th>{{/if}}
+          <th>Type</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Balance After</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if transactions.length}}
+          {{#each transactions}}
+            <tr>
+              <td><span class="code-pill">{{this.transaction_reference}}</span></td>
+              <td>{{formatDate this.transaction_date}}</td>
+              {{#if ../isGlobal}}
+                <td>
+                  <a href="/account/{{this.account_number}}"><strong>{{this.account_number}}</strong></a>
+                  <br>
+                  <small class="muted">{{this.first_name}} {{this.last_name}}</small>
+                </td>
+              {{/if}}
+              <td>
+                {{#if (eq this.transaction_type "CREDIT")}}<span class="badge badge-credit">CREDIT</span>{{/if}}
+                {{#if (eq this.transaction_type "DEBIT")}}<span class="badge badge-debit">DEBIT</span>{{/if}}
+              </td>
+              <td>{{this.description}}</td>
+              <td class="amount {{#if (eq this.transaction_type "CREDIT")}}credit{{else}}debit{{/if}}">
+                {{#if (eq this.transaction_type "CREDIT")}}+{{else}}&minus;{{/if}}{{formatCurrency this.amount}}
+              </td>
+              <td class="amount">{{formatCurrency this.balance_after_transaction}}</td>
+            </tr>
+          {{/each}}
+        {{else}}
+          <tr>
+            <td colspan="{{#if isGlobal}}7{{else}}6{{/if}}" class="empty-cell">
+              No transactions found matching the criteria.
+            </td>
+          </tr>
+        {{/if}}
+      </tbody>
+    </table>
+  </div>
+</section>

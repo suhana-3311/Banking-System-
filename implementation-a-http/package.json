@@ -1,0 +1,25 @@
+{
+  "name": "online-banking-http",
+  "version": "1.0.0",
+  "description": "Online Banking System - Implementation A (Native Node.js HTTP + PostgreSQL)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "banking",
+    "node",
+    "http",
+    "postgresql"
+  ],
+  "author": "Online Banking System",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "pg": "^8.12.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,144 @@
+<div class="page-header">
+  <div>
+    <h1>Bank Accounts</h1>
+    <p class="muted">Manage all customer deposit and savings accounts</p>
+  </div>
+  <div class="header-actions">
+    <button id="show-add-transaction" class="btn btn-ghost">+ New Transaction</button>
+    <button id="show-add-account" class="btn btn-primary">+ Open Account</button>
+  </div>
+</div>
+
+<section id="add-account-panel" class="panel hidden">
+  <div class="panel-title"><h2>Open a New Account</h2></div>
+  <form id="add-account-form" class="form-grid" novalidate>
+    <label>Customer
+      <select name="customer_id" required>
+        <option value="">Select customer</option>
+        {{#each customers}}
+          <option value="{{this.id}}">{{this.customer_code}} - {{this.first_name}} {{this.last_name}} ({{this.city}})</option>
+        {{/each}}
+      </select>
+    </label>
+    <label>Account Type
+      <select name="account_type" required>
+        <option value="">Select type</option>
+        <option value="Savings">Savings Account</option>
+        <option value="Current">Current Account</option>
+        <option value="Salary">Salary Account</option>
+      </select>
+    </label>
+    <label>Initial Deposit (₹)
+      <input type="number" name="initial_balance" min="0" step="0.01" value="0">
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Create Account</button>
+      <button type="button" id="hide-add-account" class="btn btn-ghost">Cancel</button>
+    </div>
+    <p id="add-account-message" class="form-message" role="status"></p>
+  </form>
+</section>
+
+<section id="add-transaction-panel" class="panel hidden">
+  <div class="panel-title"><h2>New Transaction / Fund Transfer</h2></div>
+  <form id="add-transaction-form" class="form-grid" novalidate>
+    <label>Source Account
+      <select name="account_number" id="txn-source-account" required>
+        <option value="">Select account</option>
+        {{#each accounts}}
+          {{#if (eq this.status "Active")}}
+            <option value="{{this.account_number}}">{{this.account_number}} - {{this.first_name}} {{this.last_name}} (Balance: {{formatCurrency this.balance}})</option>
+          {{/if}}
+        {{/each}}
+      </select>
+    </label>
+    <label>Transaction Type
+      <select name="transaction_type" id="txn-type-select" required>
+        <option value="">Select type</option>
+        <option value="CREDIT">Deposit (CREDIT)</option>
+        <option value="DEBIT">Withdrawal (DEBIT)</option>
+        <option value="TRANSFER">Fund Transfer (TRANSFER)</option>
+      </select>
+    </label>
+    <label id="destination-account-group" class="hidden">Destination Account
+      <select name="to_account_number" id="txn-dest-account">
+        <option value="">Select recipient account</option>
+        {{#each accounts}}
+          {{#if (eq this.status "Active")}}
+            <option value="{{this.account_number}}">{{this.account_number}} - {{this.first_name}} {{this.last_name}}</option>
+          {{/if}}
+        {{/each}}
+      </select>
+    </label>
+    <label>Amount (₹)
+      <input type="number" name="amount" min="0.01" step="0.01" placeholder="0.00" required>
+    </label>
+    <label>Description / Remarks
+      <input type="text" name="description" maxlength="255" placeholder="e.g. Cash deposit, Salary, Rent payment" required>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Submit Transaction</button>
+      <button type="button" id="hide-add-transaction" class="btn btn-ghost">Cancel</button>
+    </div>
+    <p id="add-transaction-message" class="form-message" role="status"></p>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="panel-title">
+    <h2>All Accounts</h2>
+    <span class="muted">{{accounts.length}} accounts registered</span>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Account No.</th>
+          <th>Customer</th>
+          <th>Type</th>
+          <th>Balance</th>
+          <th>Status</th>
+          <th>Opened</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if accounts.length}}
+          {{#each accounts}}
+            <tr>
+              <td>
+                <a href="/account/{{this.account_number}}" class="fw-semibold"><strong>{{this.account_number}}</strong></a>
+              </td>
+              <td>
+                <a href="/customer/{{this.customer_id}}">{{this.first_name}} {{this.last_name}}</a>
+                <span class="muted">({{this.customer_code}})</span>
+              </td>
+              <td>{{this.account_type}}</td>
+              <td class="amount {{#if (eq this.status "Active")}}credit{{/if}}">
+                {{formatCurrency this.balance}}
+              </td>
+              <td>
+                {{#if (eq this.status "Active")}}
+                  <span class="badge badge-active">Active</span>
+                {{else if (eq this.status "Inactive")}}
+                  <span class="badge badge-inactive">Inactive</span>
+                {{else}}
+                  <span class="badge badge-closed">Closed</span>
+                {{/if}}
+              </td>
+              <td>{{formatDate this.opened_at}}</td>
+              <td>
+                <div class="table-actions">
+                  <a class="btn btn-small btn-ghost" href="/account/{{this.account_number}}">Details</a>
+                  <a class="btn btn-small btn-ghost" href="/transactions/{{this.account_number}}">History</a>
+                </div>
+              </td>
+            </tr>
+          {{/each}}
+        {{else}}
+          <tr><td colspan="7" class="empty-cell">No accounts found in the system.</td></tr>
+        {{/if}}
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -1,0 +1,61 @@
+<div class="page-header">
+  <div>
+    <h1>Customers</h1>
+    <p class="muted">All registered customers of the bank</p>
+  </div>
+  <button id="show-add-customer" class="btn btn-primary">+ Add Customer</button>
+</div>
+
+<section id="add-customer-panel" class="panel hidden">
+  <div class="panel-title"><h2>Add Customer</h2></div>
+  <form id="add-customer-form" class="form-grid" novalidate>
+    <label>First Name <input type="text" name="first_name" required></label>
+    <label>Last Name <input type="text" name="last_name" required></label>
+    <label>Email <input type="email" name="email" required></label>
+    <label>Phone <input type="text" name="phone" required></label>
+    <label>Address <input type="text" name="address"></label>
+    <label>City <input type="text" name="city" required></label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Create Customer</button>
+      <button type="button" id="hide-add-customer" class="btn btn-ghost">Cancel</button>
+    </div>
+    <p id="add-customer-message" class="form-message" role="status"></p>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="panel-title">
+    <h2>Customer Directory</h2>
+    <span class="muted">{{customers.length}} customers</span>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Customer Code</th>
+          <th>Customer</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>City</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if customers.length}}
+          {{#each customers}}
+            <tr>
+              <td><span class="code-pill">{{this.customer_code}}</span></td>
+              <td>{{this.first_name}} {{this.last_name}}</td>
+              <td>{{this.email}}</td>
+              <td>{{this.phone}}</td>
+              <td>{{this.city}}</td>
+              <td><a class="btn btn-small" href="/customer/{{this.id}}">View Details</a></td>
+            </tr>
+          {{/each}}
+        {{else}}
+          <tr><td colspan="6" class="empty-cell">No customers found.</td></tr>
+        {{/if}}
+      </tbody>
+    </table>
+  </div>
+</section>

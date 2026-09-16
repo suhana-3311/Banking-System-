@@ -1,0 +1,214 @@
+<div class="page-header">
+  <div>
+    <h1>Banking Dashboard</h1>
+    <p class="muted">Overview of the Online Banking Management System</p>
+  </div>
+  <div class="header-actions">
+    <button id="show-add-transaction" class="btn btn-primary">+ New Transaction</button>
+    <button id="show-add-account" class="btn btn-ghost">+ Open Account</button>
+    <button id="show-add-customer" class="btn btn-ghost">+ Add Customer</button>
+  </div>
+</div>
+
+<section id="add-transaction-panel" class="panel hidden">
+  <div class="panel-title"><h2>Quick Transaction / Fund Transfer</h2></div>
+  <form id="add-transaction-form" class="form-grid" novalidate>
+    <label>Source Account
+      <select name="account_number" id="txn-source-account" required>
+        <option value="">Select source account</option>
+        {{#each accounts}}
+          <option value="{{this.account_number}}">{{this.account_number}} - {{this.first_name}} {{this.last_name}} (Bal: {{formatCurrency this.balance}})</option>
+        {{/each}}
+      </select>
+    </label>
+    <label>Transaction Type
+      <select name="transaction_type" id="txn-type-select" required>
+        <option value="">Select type</option>
+        <option value="CREDIT">Deposit (CREDIT)</option>
+        <option value="DEBIT">Withdrawal (DEBIT)</option>
+        <option value="TRANSFER">Fund Transfer (TRANSFER)</option>
+      </select>
+    </label>
+    <label id="destination-account-group" class="hidden">Destination Account
+      <select name="to_account_number" id="txn-dest-account">
+        <option value="">Select recipient account</option>
+        {{#each accounts}}
+          <option value="{{this.account_number}}">{{this.account_number}} - {{this.first_name}} {{this.last_name}}</option>
+        {{/each}}
+      </select>
+    </label>
+    <label>Amount (₹)
+      <input type="number" name="amount" min="0.01" step="0.01" placeholder="0.00" required>
+    </label>
+    <label>Description / Remarks
+      <input type="text" name="description" maxlength="255" placeholder="e.g. Deposit, ATM withdrawal, Transfer" required>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Process Transaction</button>
+      <button type="button" id="hide-add-transaction" class="btn btn-ghost">Cancel</button>
+    </div>
+    <p id="add-transaction-message" class="form-message" role="status"></p>
+  </form>
+</section>
+
+<section id="add-account-panel" class="panel hidden">
+  <div class="panel-title"><h2>Open a New Account</h2></div>
+  <form id="add-account-form" class="form-grid" novalidate>
+    <label>Customer
+      <select name="customer_id" required>
+        <option value="">Select customer</option>
+        {{#each customers}}
+          <option value="{{this.id}}">{{this.customer_code}} - {{this.first_name}} {{this.last_name}}</option>
+        {{/each}}
+      </select>
+    </label>
+    <label>Account Type
+      <select name="account_type" required>
+        <option value="">Select type</option>
+        <option value="Savings">Savings Account</option>
+        <option value="Current">Current Account</option>
+        <option value="Salary">Salary Account</option>
+      </select>
+    </label>
+    <label>Initial Deposit (₹)
+      <input type="number" name="initial_balance" min="0" step="0.01" value="0">
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Create Account</button>
+      <button type="button" id="hide-add-account" class="btn btn-ghost">Cancel</button>
+    </div>
+    <p id="add-account-message" class="form-message" role="status"></p>
+  </form>
+</section>
+
+<section id="add-customer-panel" class="panel hidden">
+  <div class="panel-title"><h2>Register New Customer</h2></div>
+  <form id="add-customer-form" class="form-grid" novalidate>
+    <label>First Name <input type="text" name="first_name" required></label>
+    <label>Last Name <input type="text" name="last_name" required></label>
+    <label>Email <input type="email" name="email" required></label>
+    <label>Phone <input type="text" name="phone" required></label>
+    <label>Address <input type="text" name="address"></label>
+    <label>City <input type="text" name="city" required></label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Create Customer</button>
+      <button type="button" id="hide-add-customer" class="btn btn-ghost">Cancel</button>
+    </div>
+    <p id="add-customer-message" class="form-message" role="status"></p>
+  </form>
+</section>
+
+<section class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon icon-people" aria-hidden="true"></div>
+    <div>
+      <p class="stat-label">Total Customers</p>
+      <p class="stat-value">{{stats.totalCustomers}}</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon icon-card" aria-hidden="true"></div>
+    <div>
+      <p class="stat-label">Total Accounts</p>
+      <p class="stat-value">{{stats.totalAccounts}}</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon icon-wallet" aria-hidden="true"></div>
+    <div>
+      <p class="stat-label">Total Bank Deposits</p>
+      <p class="stat-value">{{formatCurrency stats.totalBalance}}</p>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon icon-swap" aria-hidden="true"></div>
+    <div>
+      <p class="stat-label">Total Transactions</p>
+      <p class="stat-value">{{stats.totalTransactions}}</p>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-title">
+    <h2>Account Overview</h2>
+    <a class="btn btn-ghost btn-small" href="/accounts">View all accounts &rarr;</a>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Account Type</th>
+          <th>Total Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if stats.accountTypeCounts.length}}
+          {{#each stats.accountTypeCounts}}
+            <tr>
+              <td><strong>{{this.type}} Account</strong></td>
+              <td>{{this.count}} active accounts</td>
+            </tr>
+          {{/each}}
+        {{else}}
+          <tr><td colspan="2" class="empty-cell">No account data available.</td></tr>
+        {{/if}}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-title">
+    <h2>Recent Transactions</h2>
+    <a class="btn btn-ghost" href="/transactions">All transactions &rarr;</a>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Date</th>
+          <th>Account</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if stats.recentTransactions.length}}
+          {{#each stats.recentTransactions}}
+            <tr>
+              <td><span class="code-pill">{{this.transaction_reference}}</span></td>
+              <td>{{formatDate this.transaction_date}}</td>
+              <td>
+                <a href="/account/{{this.account_number}}"><strong>{{this.account_number}}</strong></a>
+                <br>
+                <small class="muted">{{this.first_name}} {{this.last_name}}</small>
+              </td>
+              <td>
+                {{#if (eq this.transaction_type "CREDIT")}}<span class="badge badge-credit">CREDIT</span>{{/if}}
+                {{#if (eq this.transaction_type "DEBIT")}}<span class="badge badge-debit">DEBIT</span>{{/if}}
+              </td>
+              <td>{{this.description}}</td>
+              <td class="amount {{#if (eq this.transaction_type "CREDIT")}}credit{{else}}debit{{/if}}">
+                {{#if (eq this.transaction_type "CREDIT")}}+{{else}}&minus;{{/if}}{{formatCurrency this.amount}}
+              </td>
+            </tr>
+          {{/each}}
+        {{else}}
+          <tr><td colspan="6" class="empty-cell">No recent transactions found.</td></tr>
+        {{/if}}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="quick-actions">
+  <h2>Banking Quick Actions</h2>
+  <div class="quick-grid">
+    <a class="quick-link" href="/customers"><span class="quick-icon">&#128100;</span> Customer Directory</a>
+    <a class="quick-link" href="/accounts"><span class="quick-icon">&#128179;</span> Bank Accounts</a>
+    <a class="quick-link" href="/transactions"><span class="quick-icon">&#8645;</span> Transaction History</a>
+  </div>
+</section>

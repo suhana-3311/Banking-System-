@@ -1,0 +1,1 @@
+# Static images for Implementation A are placed in this directory (e.g. .svg/.png logos).

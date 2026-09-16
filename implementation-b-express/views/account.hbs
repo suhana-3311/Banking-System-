@@ -1,0 +1,133 @@
+<div class="page-header">
+  <div>
+    <h1>Account Details</h1>
+    <p class="muted">{{account.account_number}} &middot; {{account.first_name}} {{account.last_name}}</p>
+  </div>
+  <div class="header-actions">
+    <button id="show-add-transaction" class="btn btn-primary">+ New Transaction</button>
+    <a class="btn btn-ghost" href="/customer/{{account.customer_id}}">View Customer</a>
+    <a class="btn btn-ghost" href="/accounts">&larr; All Accounts</a>
+  </div>
+</div>
+
+<section class="panel">
+  <div class="panel-title"><h2>Account Information</h2></div>
+  <div class="detail-grid">
+    <div class="detail-item">
+      <span class="detail-label">Account Number</span>
+      <span class="detail-value"><strong>{{account.account_number}}</strong></span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">Account Holder</span>
+      <span class="detail-value">
+        <a href="/customer/{{account.customer_id}}">{{account.first_name}} {{account.last_name}}</a>
+        <span class="muted">({{account.customer_code}})</span>
+      </span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">Account Type</span>
+      <span class="detail-value">{{account.account_type}} Account</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">Current Balance</span>
+      <span class="detail-value amount credit" style="font-size: 1.25rem; font-weight: 700;">{{formatCurrency account.balance}}</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">Status</span>
+      <span class="detail-value">
+        {{#if (eq account.status "Active")}}
+          <span class="badge badge-active">Active</span>
+        {{else if (eq account.status "Inactive")}}
+          <span class="badge badge-inactive">Inactive</span>
+        {{else}}
+          <span class="badge badge-closed">Closed</span>
+        {{/if}}
+      </span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">Opened Date</span>
+      <span class="detail-value">{{formatDate account.opened_at}}</span>
+    </div>
+  </div>
+</section>
+
+<section id="add-transaction-panel" class="panel hidden">
+  <div class="panel-title"><h2>Record Transaction / Fund Transfer</h2></div>
+  <form id="add-transaction-form" class="form-grid" novalidate>
+    <input type="hidden" name="account_number" id="txn-source-account" value="{{account.account_number}}">
+    
+    <label>Transaction Type
+      <select name="transaction_type" id="txn-type-select" required>
+        <option value="">Select type</option>
+        <option value="CREDIT">Deposit (CREDIT)</option>
+        <option value="DEBIT">Withdrawal (DEBIT)</option>
+        <option value="TRANSFER">Fund Transfer (TRANSFER)</option>
+      </select>
+    </label>
+
+    <label id="destination-account-group" class="hidden">Destination Account
+      <select name="to_account_number" id="txn-dest-account">
+        <option value="">Select recipient account</option>
+        {{#each otherAccounts}}
+          <option value="{{this.account_number}}">{{this.account_number}} - {{this.first_name}} {{this.last_name}} ({{this.account_type}})</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label>Amount (₹)
+      <input type="number" name="amount" min="0.01" step="0.01" placeholder="0.00" required>
+    </label>
+
+    <label>Description / Purpose
+      <input type="text" name="description" maxlength="255" placeholder="e.g. Cash deposit, Salary, Transfer, Bill payment" required>
+    </label>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Submit Transaction</button>
+      <button type="button" id="hide-add-transaction" class="btn btn-ghost">Cancel</button>
+    </div>
+    <p id="add-transaction-message" class="form-message" role="status"></p>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="panel-title">
+    <h2>Recent Transactions</h2>
+    <a class="btn btn-ghost" href="/transactions/{{account.account_number}}">Full history &rarr;</a>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if transactions.length}}
+          {{#each transactions}}
+            <tr>
+              <td><span class="code-pill">{{this.transaction_reference}}</span></td>
+              <td>{{formatDate this.transaction_date}}</td>
+              <td>
+                {{#if (eq this.transaction_type "CREDIT")}}<span class="badge badge-credit">CREDIT</span>{{/if}}
+                {{#if (eq this.transaction_type "DEBIT")}}<span class="badge badge-debit">DEBIT</span>{{/if}}
+              </td>
+              <td>{{this.description}}</td>
+              <td class="amount {{#if (eq this.transaction_type "CREDIT")}}credit{{else}}debit{{/if}}">
+                {{#if (eq this.transaction_type "CREDIT")}}+{{else}}&minus;{{/if}}{{formatCurrency this.amount}}
+              </td>
+              <td class="amount">{{formatCurrency this.balance_after_transaction}}</td>
+            </tr>
+          {{/each}}
+        {{else}}
+          <tr><td colspan="6" class="empty-cell">No transactions recorded for this account.</td></tr>
+        {{/if}}
+      </tbody>
+    </table>
+  </div>
+</section>

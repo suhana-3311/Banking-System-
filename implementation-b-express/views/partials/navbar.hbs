@@ -1,0 +1,15 @@
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand" href="/">
+      <span class="brand-mark">B</span>
+      <span class="brand-text">Banking System</span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
+    <nav class="nav" id="main-nav">
+      <a class="nav-link {{#if (eq activeNav "dashboard")}}nav-link-active{{/if}}" href="/">Dashboard</a>
+      <a class="nav-link {{#if (eq activeNav "customers")}}nav-link-active{{/if}}" href="/customers">Customers</a>
+      <a class="nav-link {{#if (eq activeNav "accounts")}}nav-link-active{{/if}}" href="/accounts">Accounts</a>
+      <a class="nav-link {{#if (eq activeNav "transactions")}}nav-link-active{{/if}}" href="/transactions">Transactions</a>
+    </nav>
+  </div>
+</header>
