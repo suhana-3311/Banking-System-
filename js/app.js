@@ -287,9 +287,47 @@ function showToast(message, type = "success") {
   setTimeout(() => toast.remove(), 4000);
 }
 
+function populateCustomerDropdown(selectedCustomerId = null) {
+  const select = document.getElementById("acc-modal-customer");
+  if (!select) return;
+  if (!store.customers || store.customers.length === 0) {
+    select.innerHTML = `<option value="">No customers available</option>`;
+    return;
+  }
+  select.innerHTML = store.customers.map(cust => `
+    <option value="${cust.id}" ${selectedCustomerId && parseInt(selectedCustomerId) === cust.id ? 'selected' : ''}>
+      ${cust.first_name} ${cust.last_name} (${cust.customer_code}) - ${cust.city}
+    </option>
+  `).join("");
+}
+
+function populateAccountDropdown(selectedAccNo = null) {
+  const select = document.getElementById("txn-modal-acc-no");
+  if (!select) return;
+  if (!store.accounts || store.accounts.length === 0) {
+    select.innerHTML = `<option value="">No accounts available</option>`;
+    return;
+  }
+  select.innerHTML = store.accounts.map(acc => {
+    const owner = store.customers.find(c => c.id === acc.customer_id);
+    const ownerName = owner ? `${owner.first_name} ${owner.last_name}` : "Unknown";
+    return `
+      <option value="${acc.account_number}" ${selectedAccNo && selectedAccNo === acc.account_number ? 'selected' : ''}>
+        ${acc.account_number} - ${ownerName} (${acc.account_type}, ₹${parseFloat(acc.balance).toLocaleString('en-IN')})
+      </option>
+    `;
+  }).join("");
+}
+
 // Modal handling
-function openModal(modalId) {
-  document.getElementById(modalId).classList.add("active");
+function openModal(modalId, param = null) {
+  if (modalId === "modal-open-account") {
+    populateCustomerDropdown(param);
+  } else if (modalId === "modal-record-txn") {
+    populateAccountDropdown(param);
+  }
+  const modal = document.getElementById(modalId);
+  if (modal) modal.classList.add("active");
 }
 
 function closeModal(modalId) {
@@ -419,12 +457,7 @@ function renderCustomerDetail(customerId) {
   document.getElementById("cd-address").textContent = c.address || "N/A";
 
   // Pre-fill Open Account Modal Customer Dropdown
-  const select = document.getElementById("acc-modal-customer");
-  select.innerHTML = store.customers.map(cust => `
-    <option value="${cust.id}" ${cust.id === c.id ? 'selected' : ''}>
-      ${cust.first_name} ${cust.last_name} (${cust.customer_code})
-    </option>
-  `).join("");
+  populateCustomerDropdown(c.id);
 
   // Customer's accounts table
   const userAccounts = store.accounts.filter(a => a.customer_id === c.id);
