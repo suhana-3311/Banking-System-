@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Banking System | Management Portal</title>
+  <meta name="description" content="Online Banking Management System - Dashboard, Customer Directory, Accounts, and Transaction Processing.">
+  
+  <!-- CSS Styling -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ========================================================================== -->
+  <!-- TOP NAVIGATION BAR                                                         -->
+  <!-- ========================================================================== -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#" onclick="navigateTo('dashboard'); return false;" class="brand">
+        <div class="brand-icon">🏦</div>
+        <div>
+          <span>Apex Bank</span>
+          <span class="brand-badge">Management</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="#" class="nav-link active" data-view="dashboard">📊 Dashboard</a></li>
+          <li><a href="#" class="nav-link" data-view="customers">👥 Customers</a></li>
+          <li><a href="#" class="nav-link" data-view="accounts">💳 Accounts</a></li>
+          <li><a href="#" class="nav-link" data-view="transactions">📜 Transactions</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-customer')">+ Customer</button>
+        <button class="btn btn-secondary btn-sm" id="btn-reset-demo" title="Reset dataset to default seed">↺ Reset Demo</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================== -->
+  <!-- MAIN CONTENT CONTAINER                                                     -->
+  <!-- ========================================================================== -->
+  <main class="main-content">
+
+    <!-- ---------------------------------------------------------------------- -->
+    <!-- 1. DASHBOARD VIEW                                                      -->
+    <!-- ---------------------------------------------------------------------- -->
+    <section id="view-dashboard" class="view-panel active">
+      <div class="page-header">
+        <div class="page-title-group">
+          <h1>Executive Banking Dashboard</h1>
+          <p>Real-time metrics, total customer holdings, and recent account activity.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-primary" onclick="openModal('modal-open-account')">+ Open Account</button>
+          <button class="btn btn-secondary" onclick="openModal('modal-record-txn')">💸 Record Transaction</button>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Total Customers</div>
+            <div class="stat-value" id="stat-customers">0</div>
+          </div>
+          <div class="stat-icon blue">👥</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Total Accounts</div>
+            <div class="stat-value" id="stat-accounts">0</div>
+          </div>
+          <div class="stat-icon purple">💳</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Total Deposits</div>
+            <div class="stat-value" id="stat-balance">₹0.00</div>
+          </div>
+          <div class="stat-icon green">📈</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Total Transactions</div>
+            <div class="stat-value" id="stat-transactions">0</div>
+          </div>
+          <div class="stat-icon amber">🧾</div>
+        </div>
+      </div>
+
+      <!-- Dashboard Main Grid -->
+      <div class="dashboard-grid">
+        <!-- Recent Transactions -->
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header">
+            <h2 class="card-title">Recent Transactions</h2>
+            <button class="btn btn-secondary btn-sm" onclick="navigateTo('transactions')">View All</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ref #</th>
+                  <th>Account</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Date & Time</th>
+                </tr>
+              </thead>
+              <tbody id="dash-transactions-body">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Quick Actions & Overview -->
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Quick Actions</h2>
+            </div>
+            <div class="card-body">
+              <div class="quick-action-list">
+                <div class="quick-action-btn" onclick="openModal('modal-add-customer')">
+                  <div class="quick-action-icon">👤</div>
+                  <div>
+                    <div>Add New Customer</div>
+                    <div style="font-weight:400; font-size:0.8rem; color:var(--slate-500);">Register customer profile</div>
+                  </div>
+                </div>
+
+                <div class="quick-action-btn" onclick="openModal('modal-open-account')">
+                  <div class="quick-action-icon">🏦</div>
+                  <div>
+                    <div>Open New Account</div>
+                    <div style="font-weight:400; font-size:0.8rem; color:var(--slate-500);">Savings, Current, or Salary</div>
+                  </div>
+                </div>
+
+                <div class="quick-action-btn" onclick="openModal('modal-record-txn')">
+                  <div class="quick-action-icon">💰</div>
+                  <div>
+                    <div>Record Transaction</div>
+                    <div style="font-weight:400; font-size:0.8rem; color:var(--slate-500);">Deposit CREDIT or DEBIT</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------------- -->
+    <!-- 2. CUSTOMERS DIRECTORY VIEW                                            -->
+    <!-- ---------------------------------------------------------------------- -->
+    <section id="view-customers" class="view-panel">
+      <div class="page-header">
+        <div class="page-title-group">
+          <h1>Customer Directory</h1>
+          <p>Manage registered bank customers, view profiles, and linked accounts.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-add-customer')">+ Add Customer</button>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="customer-search" class="search-input" placeholder="Search by name, customer code, or email...">
+        <select id="customer-city-filter" class="form-control" style="width: auto;">
+          <option value="">All Cities</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Customer Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>City</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="customers-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------------- -->
+    <!-- 3. CUSTOMER DETAIL VIEW                                                -->
+    <!-- ---------------------------------------------------------------------- -->
+    <section id="view-customer-detail" class="view-panel">
+      <div class="page-header">
+        <div class="page-title-group">
+          <button class="btn btn-secondary btn-sm" onclick="navigateTo('customers')" style="margin-bottom:0.5rem;">← Back to Directory</button>
+          <h1 id="cd-name">Customer Details</h1>
+          <p>Customer profile and linked bank accounts.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-open-account')">+ Open New Account</button>
+      </div>
+
+      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Customer Code</div>
+            <div class="stat-value" id="cd-code" style="font-size:1.3rem;">-</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Email Address</div>
+            <div class="stat-value" id="cd-email" style="font-size:1rem; word-break:break-all;">-</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Phone Number</div>
+            <div class="stat-value" id="cd-phone" style="font-size:1.1rem;">-</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">City & Address</div>
+            <div class="stat-value" id="cd-city" style="font-size:1.1rem;">-</div>
+            <div id="cd-address" style="font-size:0.8rem; color:var(--slate-500); margin-top:0.2rem;">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Linked Bank Accounts</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Account Number</th>
+                <th>Type</th>
+                <th>Balance</th>
+                <th>Status</th>
+                <th>Opened Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="cd-accounts-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------------- -->
+    <!-- 4. ACCOUNTS DIRECTORY VIEW                                             -->
+    <!-- ---------------------------------------------------------------------- -->
+    <section id="view-accounts" class="view-panel">
+      <div class="page-header">
+        <div class="page-title-group">
+          <h1>Bank Accounts Directory</h1>
+          <p>Monitor active, inactive, and closed bank accounts across all customers.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-open-account')">+ Open Account</button>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="account-search" class="search-input" placeholder="Search by account number or customer name...">
+        <select id="account-type-filter" class="form-control" style="width: auto;">
+          <option value="">All Account Types</option>
+          <option value="Savings">Savings</option>
+          <option value="Current">Current</option>
+          <option value="Salary">Salary</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Account Number</th>
+                <th>Owner Name</th>
+                <th>Type</th>
+                <th>Current Balance</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="accounts-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------------- -->
+    <!-- 5. ACCOUNT DETAIL & TRANSACTIONS VIEW                                  -->
+    <!-- ---------------------------------------------------------------------- -->
+    <section id="view-account-detail" class="view-panel">
+      <div class="page-header">
+        <div class="page-title-group">
+          <button class="btn btn-secondary btn-sm" onclick="navigateTo('accounts')" style="margin-bottom:0.5rem;">← Back to Accounts</button>
+          <h1>Account Details & History</h1>
+          <p>Detailed view and full ledger transactions for account.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-record-txn')">+ Record Transaction</button>
+      </div>
+
+      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Account Number</div>
+            <div class="stat-value" id="ad-acc-no" style="font-size:1.3rem;">-</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Account Holder</div>
+            <div class="stat-value" id="ad-owner" style="font-size:1.2rem;">-</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Current Balance</div>
+            <div class="stat-value" id="ad-balance" style="color:var(--emerald-600); font-size:1.5rem;">₹0.00</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Type & Status</div>
+            <div style="margin-top:0.3rem;"><span id="ad-type" style="font-weight:700;">-</span> &bull; <span id="ad-status">-</span></div>
+            <div id="ad-date" style="font-size:0.8rem; color:var(--slate-500); margin-top:0.2rem;">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Transaction History</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Reference #</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Running Balance</th>
+                <th>Date & Time</th>
+              </tr>
+            </thead>
+            <tbody id="ad-transactions-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------------- -->
+    <!-- 6. GLOBAL TRANSACTIONS VIEW                                            -->
+    <!-- ---------------------------------------------------------------------- -->
+    <section id="view-transactions" class="view-panel">
+      <div class="page-header">
+        <div class="page-title-group">
+          <h1>Master Transaction Log</h1>
+          <p>Audit log of all CREDIT and DEBIT transactions across all bank accounts.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-record-txn')">+ Record Transaction</button>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="txn-search" class="search-input" placeholder="Search by reference, account number, or description...">
+        <select id="txn-type-filter" class="form-control" style="width: auto;">
+          <option value="">All Types</option>
+          <option value="CREDIT">CREDIT</option>
+          <option value="DEBIT">DEBIT</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ref #</th>
+                <th>Account</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Running Balance</th>
+                <th>Date & Time</th>
+              </tr>
+            </thead>
+            <tbody id="transactions-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================== -->
+  <!-- MODAL DIALOGS                                                              -->
+  <!-- ========================================================================== -->
+
+  <!-- Modal: Add Customer -->
+  <div id="modal-add-customer" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Create New Customer</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-customer')">&times;</button>
+      </div>
+      <form id="form-add-customer">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name *</label>
+              <input type="text" id="cust-first-name" class="form-control" placeholder="e.g. Rahul" required>
+            </div>
+            <div class="form-group">
+              <label>Last Name *</label>
+              <input type="text" id="cust-last-name" class="form-control" placeholder="e.g. Sharma" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" id="cust-email" class="form-control" placeholder="e.g. rahul.sharma@example.com" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone Number *</label>
+              <input type="tel" id="cust-phone" class="form-control" placeholder="e.g. +91-9876543210" required>
+            </div>
+            <div class="form-group">
+              <label>City *</label>
+              <input type="text" id="cust-city" class="form-control" placeholder="e.g. Mumbai" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Address</label>
+            <input type="text" id="cust-address" class="form-control" placeholder="e.g. 12 Marine Drive">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-customer')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Open Account -->
+  <div id="modal-open-account" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Open New Bank Account</h3>
+        <button class="modal-close" onclick="closeModal('modal-open-account')">&times;</button>
+      </div>
+      <form id="form-open-account">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Select Customer *</label>
+            <select id="acc-modal-customer" class="form-control" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Account Type *</label>
+              <select id="acc-modal-type" class="form-control" required>
+                <option value="Savings">Savings</option>
+                <option value="Current">Current</option>
+                <option value="Salary">Salary</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Opening Deposit (₹)</label>
+              <input type="number" id="acc-modal-balance" class="form-control" min="0" step="0.01" placeholder="0.00">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-open-account')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Open Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Record Transaction -->
+  <div id="modal-record-txn" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Record Transaction</h3>
+        <button class="modal-close" onclick="closeModal('modal-record-txn')">&times;</button>
+      </div>
+      <form id="form-record-txn">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Account Number *</label>
+            <input type="text" id="txn-modal-acc-no" class="form-control" placeholder="e.g. ACC100001" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Transaction Type *</label>
+              <select id="txn-modal-type" class="form-control" required>
+                <option value="CREDIT">CREDIT (Deposit)</option>
+                <option value="DEBIT">DEBIT (Withdrawal)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Amount (₹) *</label>
+              <input type="number" id="txn-modal-amount" class="form-control" min="0.01" step="0.01" placeholder="e.g. 500.00" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description / Notes</label>
+            <input type="text" id="txn-modal-desc" class="form-control" placeholder="e.g. Monthly Rent, Salary, Transfer">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-record-txn')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- ========================================================================== -->
+  <!-- FOOTER                                                                     -->
+  <!-- ========================================================================== -->
+  <footer>
+    <div class="footer-content">
+      <div>&copy; 2026 Online Banking Management System. Case Study 3.</div>
+      <div>Client Web App &bull; Deployed on GitHub Pages</div>
+    </div>
+  </footer>
+
+  <!-- Application Engine Script -->
+  <script src="js/app.js"></script>
+</body>
+</html>
